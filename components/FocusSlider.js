@@ -1,10 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
-import Content from "./FocusContent";
-import ContentTwo from "./FocusContentTwo";
-import FocusGallery from "./FocusGallery";
+import { useEffect, useState } from "react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 const CARDS = [
   {
@@ -12,329 +9,149 @@ const CARDS = [
     category: "RETAIL LOGISTICS",
     date: "JANUARY 10, 2026",
     title: "Optimizing Supply Chains in the Digital Era",
-    image: "img/t1.jpg",
+    excerpt:
+      "Despite a tough market environment, specialty retailers can turn their unique combination of sensory experience into growth.",
+    image: "/img/t1.jpg",
   },
   {
     id: 2,
     category: "URBAN PLANNING",
     date: "JANUARY 12, 2026",
     title: "The Architecture of Modern Solitude",
-    image: "img/t2.png",
+    excerpt:
+      "Urban design is increasingly responding to how individuals experience solitude within dense environments.",
+    image: "/img/t2.png",
   },
   {
     id: 3,
     category: "ARTIFICIAL INTELLIGENCE",
     date: "JANUARY 15, 2026",
-    title: "As AI Investments Surge, CEOs Take the Lead",
-    image: "img/t3.jpg",
+    title: "How Specialty Retail Can Get Its Groove Back",
+    excerpt:
+      "Specialty retail is evolving fast as AI reshapes customer engagement and operational intelligence.",
+    image: "/img/t3.jpg",
   },
   {
     id: 4,
     category: "DESIGN SYSTEMS",
     date: "JANUARY 18, 2026",
     title: "Abstract Patterns in Structural Engineering",
-    image: "img/t4.jpg",
+    excerpt:
+      "Structural systems are embracing abstraction to balance aesthetics with performance.",
+    image: "/img/t4.jpg",
   },
-  
+  {
+    id: 5,
+    category: "URBAN PLANNING",
+    date: "JANUARY 12, 2026",
+    title: "The Architecture of Modern Solitude",
+    excerpt:
+      "Urban design is increasingly responding to how individuals experience solitude within dense environments.",
+    image: "/img/t2.png",
+  },
 ];
 
-const BASE_CARD_STYLE =
-  "absolute inset-0 rounded-2xl overflow-hidden bg-neutral-900 border border-neutral-800 shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] cursor-grab active:cursor-grabbing";
-
-function FocusSlider() {
+export default function FocusSlider() {
   const [activeIndex, setActiveIndex] = useState(2);
-  const [isPaused, setIsPaused] = useState(false);
-
+  const [hoveredIndex, setHoveredIndex] = useState(null);
   const total = CARDS.length;
 
-  // -------------------------
-  // Navigation helpers
-  // -------------------------
-  const handleNext = useCallback(() => {
-    setActiveIndex((i) => (i + 1) % total);
-  }, [total]);
-
-  const handlePrev = useCallback(() => {
-    setActiveIndex((i) => (i - 1 + total) % total);
-  }, [total]);
-
-  // -------------------------
-  // Keyboard navigation
-  // -------------------------
+ 
   useEffect(() => {
-    const onKeyDown = (e) => {
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
-        return;
-
-      if (e.key === "ArrowRight") handleNext();
-      if (e.key === "ArrowLeft") handlePrev();
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [handleNext, handlePrev]);
-
-  // -------------------------
-  // Autoplay
-  // -------------------------
-  useEffect(() => {
-    if (isPaused) return;
-
     const id = setInterval(() => {
       setActiveIndex((i) => (i + 1) % total);
-    }, 3800);
-
+    }, 4200);
     return () => clearInterval(id);
-  }, [isPaused, total]);
+  }, [total]);
 
-  // -------------------------
-  // Drag + inertia + rubber band
-  // -------------------------
-  const dragStartX = useRef(0);
-  const dragDeltaX = useRef(0);
-  const lastX = useRef(0);
-  const lastT = useRef(0);
-  const velocity = useRef(0);
-  const isDragging = useRef(false);
-  const resumeTimer = useRef(null);
-
-  const DRAG_THRESHOLD = 60;
-  const VELOCITY_THRESHOLD = 0.45;
-  const INERTIA_MULTIPLIER = 260;
-
-  const rubberBand = (distance, dimension = 300, resistance = 0.55) => {
-    if (distance === 0) return 0;
-    const sign = Math.sign(distance);
-    const abs = Math.abs(distance);
-    return sign * (dimension * resistance * (1 - Math.exp(-abs / dimension)));
-  };
-
-  const stopResume = () => {
-    if (resumeTimer.current) {
-      clearTimeout(resumeTimer.current);
-      resumeTimer.current = null;
-    }
-  };
-
-  const resumeAutoplay = () => {
-    stopResume();
-    resumeTimer.current = setTimeout(() => {
-      setIsPaused(false);
-    }, 700);
-  };
-
-  const onPointerDown = (e) => {
-    stopResume();
-    isDragging.current = true;
-    dragStartX.current = e.clientX;
-    dragDeltaX.current = 0;
-    lastX.current = e.clientX;
-    lastT.current = performance.now();
-    velocity.current = 0;
-    setIsPaused(true);
-  };
-
-  const onPointerMove = (e) => {
-    if (!isDragging.current) return;
-
-    const now = performance.now();
-    const x = e.clientX;
-
-    const rawDelta = x - dragStartX.current;
-    dragDeltaX.current = rubberBand(rawDelta);
-
-    const dx = x - lastX.current;
-    const dt = Math.max(1, now - lastT.current);
-    const v = dx / dt;
-
-    velocity.current = velocity.current * 0.75 + v * 0.25;
-    lastX.current = x;
-    lastT.current = now;
-  };
-
-  const stepSlides = (steps) => {
-    setActiveIndex((i) => (i + steps + total) % total);
-  };
-
-  const onPointerUp = () => {
-    if (!isDragging.current) return;
-
-    const delta = dragDeltaX.current;
-    const v = velocity.current;
-
-    const projected = rubberBand(delta, 280, 0.6) + v * INERTIA_MULTIPLIER;
-
-    const absDelta = Math.abs(delta);
-    const absV = Math.abs(v);
-    const absProjected = Math.abs(projected);
-
-    const dir = projected > 0 ? -1 : projected < 0 ? 1 : 0;
-
-    let steps = 0;
-    if (absDelta > DRAG_THRESHOLD || absV > VELOCITY_THRESHOLD) {
-      steps = 1;
-      if (
-        absProjected > DRAG_THRESHOLD * 2.2 ||
-        absV > VELOCITY_THRESHOLD * 1.8
-      ) {
-        steps = 2;
-      }
-    }
-
-    if (steps && dir !== 0) stepSlides(dir * steps);
-
-    isDragging.current = false;
-    dragDeltaX.current = 0;
-    velocity.current = 0;
-
-    resumeAutoplay();
-  };
-
-  // -------------------------
-  // Layout math
-  // -------------------------
-  const getDistance = (index) => {
-    let d = index - activeIndex;
+  const getOffset = (i) => {
+    let d = i - activeIndex;
     if (d > total / 2) d -= total;
     if (d < -total / 2) d += total;
     return d;
   };
 
-  const getStyle = (distance) => {
-    if (distance === 0) {
-      return {
-        z: "z-30",
-        opacity: "opacity-100",
-        transform: "translateX(0%) scale(1.15)",
-        clickable: true,
-      };
-    }
-
-    if (Math.abs(distance) === 1) {
-      return {
-        z: "z-20",
-        opacity: "opacity-60",
-        transform: `translateX(${distance * 65}%) scale(0.85) rotateY(${distance * -8}deg)`,
-        clickable: true,
-      };
-    }
-
-    return {
-      z: "z-10",
-      opacity: "opacity-0 pointer-events-none",
-      transform: `translateX(${distance > 0 ? "150%" : "-150%"}) scale(0.5)`,
-      clickable: false,
-    };
-  };
-
   return (
-    <section className="relative w-full max-w-5xl h-[600px] flex flex-col items-center justify-center overflow-hidden">
-      <div
-        className="relative w-full h-full flex items-center justify-center [perspective:1000px] select-none touch-pan-y"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => !isDragging.current && setIsPaused(false)}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerLeave={onPointerUp}
-      >
-        <div className="relative w-[300px] md:w-[400px] h-[450px] md:h-[550px]">
-          {CARDS.map((card, index) => {
-            const distance = getDistance(index);
-            const style = getStyle(distance);
-            const isActive = distance === 0;
+    <main className="min-h-screen flex items-center justify-center bg-white">
+      <section className="relative w-full max-w-6xl">
+        <div className="relative h-[520px] flex items-center justify-center">
+          {CARDS.map((card, i) => {
+            const d = getOffset(i);
+            const isHovered = hoveredIndex === i;
+            const isCenter = d === 0;
 
             return (
               <div
                 key={card.id}
-                className={`${BASE_CARD_STYLE} ${style.z} ${style.opacity}`}
+                className="absolute transition-all duration-700 ease-out cursor-pointer"
                 style={{
-                  transform:
-                    isDragging.current && isActive
-                      ? `${style.transform} translateX(${dragDeltaX.current * 0.12}px)`
-                      : style.transform,
+                  transform: `translateX(${d * 320}px) scale(${
+                    isCenter ? 1 : 0.85
+                  })`,
+                  opacity: Math.abs(d) > 2 ? 0 : 1,
+                  zIndex: isHovered ? 40 : isCenter ? 30 : 10 - Math.abs(d),
                 }}
-                onClick={() => style.clickable && setActiveIndex(index)}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
               >
-                <img
-                  src={card.image}
-                  alt={card.title}
-                  draggable={false}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+                <div className="relative w-[280px] md:w-[360px] h-[420px] rounded-xl overflow-hidden shadow-2xl">
+                  <img
+                    src={card.image}
+                    alt={card.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    draggable={false}
+                  />
 
-                <div
-                  className={`absolute inset-0 bg-gradient-to-b from-transparent to-black/90 transition-opacity ${
-                    isActive ? "opacity-80" : "opacity-40"
-                  }`}
-                />
+                
+                  {!isHovered && (
+                    <div className="absolute inset-0 bg-black/30 transition-opacity" />
+                  )}
 
-                <div
-                  className={`absolute inset-x-0 bottom-0 p-8 transition-all duration-500 ${
-                    isActive
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-4"
-                  }`}
-                >
-                  <span className="text-[10px] font-bold tracking-widest uppercase border border-white/20 px-2 py-1 rounded-full mb-4 inline-block">
-                    {card.category}
-                  </span>
-                  <h2 className="text-2xl md:text-3xl font-light mb-4">
-                    {card.title}
-                  </h2>
-                  <div className="flex items-center gap-2 text-xs font-bold">
-                    READ ARTICLE <ArrowRight size={14} />
-                  </div>
+                 
+                  {isHovered && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-white/90 backdrop-blur-xl rounded-xl p-6 w-[85%] text-black shadow-xl animate-fadeUp">
+                        <div className="text-xs font-semibold tracking-widest mb-2">
+                          ARTICLE{" "}
+                          <span className="ml-2 font-normal">{card.date}</span>
+                        </div>
+
+                        <h2 className="text-xl font-medium mb-3">
+                          {card.title}
+                        </h2>
+
+                        <p className="text-sm text-neutral-600 mb-5">
+                          {card.excerpt}
+                        </p>
+
+                        <button className="inline-flex items-center gap-2 bg-lime-400 hover:bg-lime-500 text-black px-5 py-2 rounded-full text-sm font-semibold transition">
+                          LEARN MORE <ArrowRight size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
-      </div>
-
-      <div className="flex gap-4 mt-8 z-40">
-        <button
-          onClick={() => {
-            setIsPaused(true);
-            handlePrev();
-            resumeAutoplay();
-          }}
-          className="p-3 bg-black/5 rounded-full hover:bg-black/10 transition"
-        >
-          <ChevronLeft />
-        </button>
-        <button
-          onClick={() => {
-            setIsPaused(true);
-            handleNext();
-            resumeAutoplay();
-          }}
-          className="p-3 bg-black/5 rounded-full hover:bg-black/10 transition"
-        >
-          <ChevronRight />
-        </button>
-      </div>
-    </section>
-  );
-}
-
-export default function Home() {
-  return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-white py-24">
-      <div className="text-center mb-16">
-        <h1 className="text-4xl font-bold text-black mb-4">
-          Execution-Driven Business Operations
-        </h1>
-        <p className="text-neutral-400">
-          Across • Trading • Consulting • Export • Manufacturing • Development
-        </p>
-      </div>
 
       
-      <FocusSlider />
-      <Content />
-      <ContentTwo />
-      <FocusGallery />
+        <div className="flex justify-center gap-4 mt-10">
+          <button
+            onClick={() => setActiveIndex((i) => (i - 1 + total) % total)}
+            className="p-3 rounded-full bg-black/5 hover:bg-black/10"
+          >
+            <ChevronLeft />
+          </button>
+          <button
+            onClick={() => setActiveIndex((i) => (i + 1) % total)}
+            className="p-3 rounded-full bg-black/5 hover:bg-black/10"
+          >
+            <ChevronRight />
+          </button>
+        </div>
+      </section>
     </main>
   );
 }

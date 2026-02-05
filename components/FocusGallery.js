@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 export default function FocusGallerySnap() {
   const items = [
@@ -11,46 +11,7 @@ export default function FocusGallerySnap() {
     { id: 4, src: "/img/g4.jpg", title: "Growth" },
   ];
 
-  const sliderRef = useRef(null);
-  const intervalRef = useRef(null);
-  const indexRef = useRef(0);
   const [activeImage, setActiveImage] = useState(null);
-
-  /* 📱 MOBILE AUTO SLIDE */
-  useEffect(() => {
-    const slider = sliderRef.current;
-    if (!slider) return;
-
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    if (!isMobile) return;
-
-    const slides = slider.children;
-    if (!slides.length) return;
-
-    const slideWidth = slides[0].offsetWidth;
-
-    const start = () => {
-      intervalRef.current = setInterval(() => {
-        indexRef.current = (indexRef.current + 1) % items.length;
-        slider.scrollTo({
-          left: slideWidth * indexRef.current,
-          behavior: "smooth",
-        });
-      }, 3200);
-    };
-
-    const stop = () => clearInterval(intervalRef.current);
-
-    start();
-    slider.addEventListener("touchstart", stop);
-    slider.addEventListener("touchend", start);
-
-    return () => {
-      stop();
-      slider.removeEventListener("touchstart", stop);
-      slider.removeEventListener("touchend", start);
-    };
-  }, [items.length]);
 
   return (
     <section className="w-full bg-slate-50 py-12 md:py-20">
@@ -61,38 +22,25 @@ export default function FocusGallerySnap() {
             Our Project Gallery
           </h1>
           <p className="mt-2 text-sm md:text-base text-slate-600">
-            Swipe or tap to explore
+            Tap to explore
           </p>
         </div>
 
-        {/* 📱 MOBILE SLIDER */}
-        <div className="md:hidden">
-          <div
-            ref={sliderRef}
-            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth px-1"
-          >
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="snap-center min-w-[85%]"
-                onClick={() => setActiveImage(item)}
-              >
-                <div className="rounded-xl overflow-hidden bg-white shadow-md active:scale-[0.98] transition">
-                  <img
-                    src={item.src}
-                    alt={item.title}
-                    className="h-[45vw] max-h-64 w-full object-cover"
-                  />
-                  <div className="p-3">
-                    <h3 className="text-base font-medium">{item.title}</h3>
-                    <p className="text-xs text-slate-500">
-                      Tap to view fullscreen
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* 📱 MOBILE – 4 IMAGES IN ONE FRAME */}
+        <div className="md:hidden grid grid-cols-2 gap-3">
+          {items.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => setActiveImage(item)}
+              className="overflow-hidden rounded-xl bg-white shadow active:scale-[0.97] transition"
+            >
+              <img
+                src={item.src}
+                alt={item.title}
+                className="h-[40vw] w-full object-cover"
+              />
+            </div>
+          ))}
         </div>
 
         {/* 🖥️ DESKTOP GRID */}
