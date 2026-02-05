@@ -9,193 +9,154 @@ gsap.registerPlugin(ScrollTrigger);
 export default function ContentTwo() {
   const sectionRef = useRef(null);
   const cardsRef = useRef([]);
-  const imagesRef = useRef([]);
-  const ctaRefs = useRef([]);
 
   const CARDS = [
     {
       id: 1,
       title: "Trading",
       description: "High-demand goods sourced and distributed with precision",
-      image: "img/se1.png",
     },
     {
       id: 2,
       title: "Consulting",
       description:
         "Execution-driven business systems designed for scalable growth",
-      image: "img/se2.png",
     },
     {
       id: 3,
       title: "Exports",
       description: "Compliant export operations enabling global market access",
-      image: "img/se3.png",
     },
     {
       id: 4,
-      title: "Manufacturing",
-      description: "Lean production systems built for speed and consistency",
-      image: "img/se4.png",
-    },
-    {
-      id: 5,
       title: "Real Estate",
       description:
         "End-to-end real estate execution delivering long-term value",
-      image: "img/se5.png",
+    },
+    {
+      id: 5,
+      title: "Manufacturing",
+      description: "Lean production systems built for speed and consistency",
     },
   ];
 
   useEffect(() => {
-    const isMobile = window.innerWidth < 768;
-
     const ctx = gsap.context(() => {
-      // Section entrance
-      gsap.fromTo(
-        sectionRef.current,
-        { opacity: 0, y: isMobile ? 20 : 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: isMobile ? 0.6 : 0.9,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 85%",
-          },
+      // Section fade
+      gsap.from(sectionRef.current, {
+        opacity: 0,
+        y: 24,
+        duration: 0.8,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 85%",
+          once: true,
         },
-      );
+      });
 
-      // Cards animation
-      gsap.fromTo(
-        cardsRef.current,
-        { opacity: 0, y: isMobile ? 24 : 50 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: isMobile ? 0.45 : 0.8,
-          stagger: isMobile ? 0.08 : 0.12,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-          },
+      // Cards stagger
+      gsap.from(cardsRef.current, {
+        opacity: 0,
+        y: 16,
+        duration: 0.5,
+        stagger: 0.06,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          once: true,
         },
-      );
-
-      // Image parallax (desktop only)
-      if (!isMobile) {
-        imagesRef.current.forEach((img) => {
-          if (!img) return;
-          gsap.fromTo(
-            img,
-            { y: -16 },
-            {
-              y: 16,
-              ease: "none",
-              scrollTrigger: {
-                trigger: img,
-                start: "top bottom",
-                end: "bottom top",
-                scrub: true,
-              },
-            },
-          );
-        });
-      }
-
-      // CTA hover (desktop only)
-      if (!isMobile) {
-        ctaRefs.current.forEach((btn) => {
-          if (!btn) return;
-          const tl = gsap.timeline({ paused: true });
-          tl.to(btn, { scale: 1.06, duration: 0.25 });
-          btn.addEventListener("mouseenter", () => tl.play());
-          btn.addEventListener("mouseleave", () => tl.reverse());
-        });
-      }
+      });
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <main className="relative overflow-hidden bg-[#f8fafc]">
-      {/* CORPORATE BACKGROUND */}
-      <div className="absolute inset-0 -z-10">
-        {/* Soft gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-slate-50 to-slate-100" />
+    <main className="relative w-full bg-[#F9F7F6] text-[#0A2540]">
+      <section ref={sectionRef} className="w-full px-4 sm:px-8 py-20">
+        {/* Header */}
+        <div className="max-w-7xl mx-auto mb-14 text-center">
+          <h1 className="text-xl sm:text-2xl font-semibold">Our Services</h1>
 
-        {/* Subtle grid */}
-        <div
-          className="absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, #0f172a 1px, transparent 1px), linear-gradient(to bottom, #0f172a 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }}
-        />
-      </div>
-
-      {/* CONTENT */}
-      <section
-        ref={sectionRef}
-        className="relative max-w-6xl mx-auto px-4 sm:px-6 py-14 z-10"
-      >
-        <div className="text-center mb-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
-            Our Services
-          </h1>
-          <p className="mt-2 text-sm sm:text-base text-slate-600 max-w-xl mx-auto">
-            Specialized business verticals built on execution, trust, and scale.
+          <p className="mt-2 text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">
+            Core business verticals executed with precision, discipline, and
+            long-term accountability.
           </p>
+
+          <div className="w-12 h-[1px] bg-slate-300 mx-auto mt-5" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {CARDS.map((card, index) => (
-            <div
-              key={card.id}
-              ref={(el) => (cardsRef.current[index] = el)}
-              className="group rounded-xl overflow-hidden
-                         bg-white
-                         border border-slate-200
-                         shadow-sm hover:shadow-lg
-                         transition-all duration-300"
-            >
-              <div className="relative h-36 sm:h-40 overflow-hidden">
-                <img
-                  ref={(el) => (imagesRef.current[index] = el)}
-                  src={card.image}
-                  alt={card.title}
-                  className="w-full h-full object-cover"
-                />
+        <div className="max-w-7xl mx-auto">
+          {/* MOBILE: 2–2–1 GRID */}
+          <div className="grid grid-cols-2 gap-4 sm:hidden">
+            {CARDS.map((card, index) => (
+              <div
+                key={card.id}
+                ref={(el) => (cardsRef.current[index] = el)}
+                className={`bg-white border border-slate-200 flex flex-col
+                  ${
+                    index === CARDS.length - 1
+                      ? "col-span-2 max-w-[320px] mx-auto"
+                      : ""
+                  }`}
+              >
+                {/* Number */}
+                <div className="px-4 pt-5">
+                  <div className="w-8 h-8 border border-slate-300 flex items-center justify-center text-[11px] font-semibold text-slate-700">
+                    {String(index + 1).padStart(2, "0")}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-4 pt-3 space-y-2 flex flex-col flex-1 text-left">
+                  <h2 className="text-[12px] font-semibold uppercase tracking-wide">
+                    {card.title}
+                  </h2>
+
+                  <p className="text-[12px] text-slate-600 leading-relaxed flex-1">
+                    {card.description}
+                  </p>
+
+                  <span className="text-[12px] font-medium">
+                    View details →
+                  </span>
+                </div>
               </div>
+            ))}
+          </div>
 
-              <div className="p-4 text-center space-y-2">
-                <h2 className="text-sm font-semibold text-slate-900">
-                  {card.title}
-                </h2>
+          {/* DESKTOP: CORPORATE GRID */}
+          <div className="hidden sm:grid grid-cols-3 gap-8">
+            {CARDS.map((card, index) => (
+              <div
+                key={card.id}
+                ref={(el) => (cardsRef.current[index] = el)}
+                className="bg-white border border-slate-200 flex flex-col"
+              >
+                {/* Number */}
+                <div className="px-5 pt-6">
+                  <div className="w-9 h-9 border border-slate-300 flex items-center justify-center text-xs font-semibold text-slate-700">
+                    {String(index + 1).padStart(2, "0")}
+                  </div>
+                </div>
 
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  {card.description}
-                </p>
+                {/* Content */}
+                <div className="p-5 pt-4 space-y-2 flex flex-col flex-1 text-left">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide">
+                    {card.title}
+                  </h2>
 
-                <button
-                  ref={(el) => (ctaRefs.current[index] = el)}
-                  className="mt-2 inline-flex items-center justify-center
-                             px-4 py-1.5 text-xs font-medium
-                             text-slate-700
-                             border border-slate-300
-                             rounded-full
-                             hover:bg-slate-900 hover:text-white
-                             transition-colors duration-300"
-                >
-                  View Details
-                </button>
+                  <p className="text-sm text-slate-600 leading-relaxed flex-1">
+                    {card.description}
+                  </p>
+
+                  <span className="text-sm font-medium">View details →</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
     </main>

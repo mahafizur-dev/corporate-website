@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 export default function FocusGallerySnap() {
   const items = [
@@ -10,83 +11,129 @@ export default function FocusGallerySnap() {
     { id: 4, src: "/img/g4.jpg", title: "Growth" },
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.12,
-      },
-    },
-  };
+  const sliderRef = useRef(null);
+  const intervalRef = useRef(null);
+  const indexRef = useRef(0);
+  const [activeImage, setActiveImage] = useState(null);
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut",
-      },
-    },
-  };
+  /* 📱 MOBILE AUTO SLIDE */
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!isMobile) return;
+
+    const slides = slider.children;
+    if (!slides.length) return;
+
+    const slideWidth = slides[0].offsetWidth;
+
+    const start = () => {
+      intervalRef.current = setInterval(() => {
+        indexRef.current = (indexRef.current + 1) % items.length;
+        slider.scrollTo({
+          left: slideWidth * indexRef.current,
+          behavior: "smooth",
+        });
+      }, 3200);
+    };
+
+    const stop = () => clearInterval(intervalRef.current);
+
+    start();
+    slider.addEventListener("touchstart", stop);
+    slider.addEventListener("touchend", start);
+
+    return () => {
+      stop();
+      slider.removeEventListener("touchstart", stop);
+      slider.removeEventListener("touchend", start);
+    };
+  }, [items.length]);
 
   return (
-    <section className="w-full bg-slate-50 py-20">
-      <div className="mx-auto max-w-7xl px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          className="mb-14 text-center"
-        >
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">
+    <section className="w-full bg-slate-50 py-12 md:py-20">
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
+        {/* Heading */}
+        <div className="mb-8 md:mb-12 text-center">
+          <h1 className="text-2xl md:text-4xl font-semibold">
             Our Project Gallery
           </h1>
-          <p className="mt-4 text-base text-slate-600">
-            A curated selection of our strategic, design, and technology-driven
-            work
+          <p className="mt-2 text-sm md:text-base text-slate-600">
+            Swipe or tap to explore
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
-        >
+        {/* 📱 MOBILE SLIDER */}
+        <div className="md:hidden">
+          <div
+            ref={sliderRef}
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth px-1"
+          >
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="snap-center min-w-[85%]"
+                onClick={() => setActiveImage(item)}
+              >
+                <div className="rounded-xl overflow-hidden bg-white shadow-md active:scale-[0.98] transition">
+                  <img
+                    src={item.src}
+                    alt={item.title}
+                    className="h-[45vw] max-h-64 w-full object-cover"
+                  />
+                  <div className="p-3">
+                    <h3 className="text-base font-medium">{item.title}</h3>
+                    <p className="text-xs text-slate-500">
+                      Tap to view fullscreen
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 🖥️ DESKTOP GRID */}
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6">
           {items.map((item) => (
-            <motion.div
+            <div
               key={item.id}
-              variants={itemVariants}
-              className="group relative overflow-hidden rounded-2xl bg-white shadow-sm transition hover:shadow-xl"
+              onClick={() => setActiveImage(item)}
+              className="group cursor-pointer overflow-hidden rounded-2xl bg-white shadow hover:shadow-xl transition"
             >
-              <motion.img
+              <img
                 src={item.src}
                 alt={item.title}
-                className="h-64 w-full object-cover"
-                whileHover={{ scale: 1.06 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/30 to-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
-
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                whileHover={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="pointer-events-none absolute bottom-0 w-full p-5"
-              >
-                <h3 className="text-lg font-medium text-white">{item.title}</h3>
-                <p className="mt-1 text-sm text-slate-200">View case study</p>
-              </motion.div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       </div>
+
+      {/* 🔍 FULLSCREEN PREVIEW */}
+      <AnimatePresence>
+        {activeImage && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setActiveImage(null)}
+          >
+            <motion.img
+              src={activeImage.src}
+              alt={activeImage.title}
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="max-h-[85vh] w-full max-w-md rounded-xl object-contain"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
