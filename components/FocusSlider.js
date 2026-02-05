@@ -19,7 +19,7 @@ const CARDS = [
     category: "URBAN PLANNING",
     date: "JANUARY 12, 2026",
     title: "The Architecture of Modern Solitude",
-    image: "img/t2.jpg",
+    image: "img/t2.png",
   },
   {
     id: 3,

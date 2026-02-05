@@ -12,15 +12,6 @@ export default function ContentTwo() {
   const imagesRef = useRef([]);
   const ctaRefs = useRef([]);
 
-  // SVG depth layers
-  const svgBackRef = useRef(null);
-  const svgMidRef = useRef(null);
-  const svgFrontRef = useRef(null);
-
-  const blobBackRef = useRef(null);
-  const blobMidRef = useRef(null);
-  const blobFrontRef = useRef(null);
-
   const CARDS = [
     {
       id: 1,
@@ -57,14 +48,34 @@ export default function ContentTwo() {
   ];
 
   useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+
     const ctx = gsap.context(() => {
+      // Section entrance
       gsap.fromTo(
         sectionRef.current,
-        { opacity: 0, y: 50 },
+        { opacity: 0, y: isMobile ? 20 : 40 },
         {
           opacity: 1,
           y: 0,
-          duration: 1,
+          duration: isMobile ? 0.6 : 0.9,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 85%",
+          },
+        },
+      );
+
+      // Cards animation
+      gsap.fromTo(
+        cardsRef.current,
+        { opacity: 0, y: isMobile ? 24 : 50 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: isMobile ? 0.45 : 0.8,
+          stagger: isMobile ? 0.08 : 0.12,
           ease: "power3.out",
           scrollTrigger: {
             trigger: sectionRef.current,
@@ -73,183 +84,114 @@ export default function ContentTwo() {
         },
       );
 
-      gsap.fromTo(
-        cardsRef.current,
-        { opacity: 0, y: 60 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.9,
-          ease: "power3.out",
-          stagger: 0.12,
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 70%",
-          },
-        },
-      );
-
-      imagesRef.current.forEach((img) => {
-        if (!img) return;
-        gsap.fromTo(
-          img,
-          { y: -20 },
-          {
-            y: 20,
-            ease: "none",
-            scrollTrigger: {
-              trigger: img,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: true,
+      // Image parallax (desktop only)
+      if (!isMobile) {
+        imagesRef.current.forEach((img) => {
+          if (!img) return;
+          gsap.fromTo(
+            img,
+            { y: -16 },
+            {
+              y: 16,
+              ease: "none",
+              scrollTrigger: {
+                trigger: img,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true,
+              },
             },
-          },
-        );
-      });
+          );
+        });
+      }
 
-      ctaRefs.current.forEach((btn) => {
-        if (!btn) return;
-        const tl = gsap.timeline({ paused: true });
-        tl.to(btn, { scale: 1.06, duration: 0.25, ease: "power2.out" });
-        btn.addEventListener("mouseenter", () => tl.play());
-        btn.addEventListener("mouseleave", () => tl.reverse());
-      });
-
-      const backPaths = [
-        "M 200 140 C 300 60 450 130 470 230 C 500 360 360 420 250 430 C 120 440 70 330 100 230 C 130 165 165 165 200 140 Z",
-        "M 220 120 C 340 50 460 150 480 250 C 510 390 350 450 245 430 C 115 400 85 315 115 245 C 145 175 185 150 220 120 Z",
-      ];
-
-      const midPaths = [
-        "M 760 220 C 860 130 980 200 995 290 C 1025 410 900 460 810 455 C 690 450 640 360 660 290 C 690 235 720 250 760 220 Z",
-        "M 780 200 C 880 120 1000 200 1015 280 C 1045 420 910 470 805 455 C 680 440 635 350 655 300 C 680 235 720 230 780 200 Z",
-      ];
-
-      const frontPaths = [
-        "M 520 160 C 600 90 700 140 720 220 C 750 310 680 360 590 355 C 480 350 450 290 460 235 C 470 190 490 185 520 160 Z",
-        "M 510 150 C 610 80 720 150 735 230 C 760 330 670 380 575 370 C 470 355 445 300 460 245 C 470 195 485 175 510 150 Z",
-      ];
-
-      gsap.set(blobBackRef.current, { attr: { d: backPaths[0] } });
-      gsap.set(blobMidRef.current, { attr: { d: midPaths[0] } });
-      gsap.set(blobFrontRef.current, { attr: { d: frontPaths[0] } });
-
-      gsap.to(blobBackRef.current, {
-        keyframes: backPaths.map((d) => ({ attr: { d } })),
-        duration: 28,
-        repeat: -1,
-        ease: "sine.inOut",
-      });
-
-      gsap.to(blobMidRef.current, {
-        keyframes: midPaths.map((d) => ({ attr: { d } })),
-        duration: 20,
-        repeat: -1,
-        ease: "sine.inOut",
-      });
-
-      gsap.to(blobFrontRef.current, {
-        keyframes: frontPaths.map((d) => ({ attr: { d } })),
-        duration: 14,
-        repeat: -1,
-        ease: "sine.inOut",
-      });
+      // CTA hover (desktop only)
+      if (!isMobile) {
+        ctaRefs.current.forEach((btn) => {
+          if (!btn) return;
+          const tl = gsap.timeline({ paused: true });
+          tl.to(btn, { scale: 1.06, duration: 0.25 });
+          btn.addEventListener("mouseenter", () => tl.play());
+          btn.addEventListener("mouseleave", () => tl.reverse());
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <main className="bg-gradient-to-br from-slate-50 via-white to-blue-50 relative overflow-hidden">
-      {/* SVG BACKGROUND */}
-      <svg
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        viewBox="0 0 1200 700"
-        preserveAspectRatio="xMidYMid slice"
-      >
-        <defs>
-          <filter id="blurBack">
-            <feGaussianBlur stdDeviation="40" />
-          </filter>
-          <filter id="blurMid">
-            <feGaussianBlur stdDeviation="26" />
-          </filter>
-          <filter id="blurFront">
-            <feGaussianBlur stdDeviation="14" />
-          </filter>
-        </defs>
+    <main className="relative overflow-hidden bg-[#f8fafc]">
+      {/* CORPORATE BACKGROUND */}
+      <div className="absolute inset-0 -z-10">
+        {/* Soft gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-slate-50 to-slate-100" />
 
-        <g ref={svgBackRef} filter="url(#blurBack)" opacity="0.3">
-          <path ref={blobBackRef} fill="rgba(59,130,246,0.3)" />
-        </g>
-
-        <g ref={svgMidRef} filter="url(#blurMid)" opacity="0.4">
-          <path ref={blobMidRef} fill="rgba(99,102,241,0.3)" />
-        </g>
-
-        <g ref={svgFrontRef} filter="url(#blurFront)" opacity="0.5">
-          <path ref={blobFrontRef} fill="rgba(147,197,253,0.3)" />
-        </g>
-      </svg>
+        {/* Subtle grid */}
+        <div
+          className="absolute inset-0 opacity-[0.035]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, #0f172a 1px, transparent 1px), linear-gradient(to bottom, #0f172a 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+          }}
+        />
+      </div>
 
       {/* CONTENT */}
       <section
         ref={sectionRef}
-        className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 z-10"
+        className="relative max-w-6xl mx-auto px-4 sm:px-6 py-14 z-10"
       >
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">
+        <div className="text-center mb-10">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
             Our Services
           </h1>
-          <p className="mt-3 text-base text-gray-600 max-w-xl mx-auto">
+          <p className="mt-2 text-sm sm:text-base text-slate-600 max-w-xl mx-auto">
             Specialized business verticals built on execution, trust, and scale.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {CARDS.map((card, index) => (
             <div
               key={card.id}
               ref={(el) => (cardsRef.current[index] = el)}
               className="group rounded-xl overflow-hidden
-                         bg-white/60 backdrop-blur-xl
-                         border border-white/30
-                         shadow-md hover:shadow-xl
-                         transition-all duration-300
-                         hover:-translate-y-1"
+                         bg-white
+                         border border-slate-200
+                         shadow-sm hover:shadow-lg
+                         transition-all duration-300"
             >
-              <div className="relative h-40 overflow-hidden">
+              <div className="relative h-36 sm:h-40 overflow-hidden">
                 <img
                   ref={(el) => (imagesRef.current[index] = el)}
                   src={card.image}
                   alt={card.title}
-                  className="w-full h-full object-cover scale-105"
+                  className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               </div>
 
-              <div className="p-4 text-center space-y-3">
-                <h2 className="text-base font-semibold text-gray-900">
+              <div className="p-4 text-center space-y-2">
+                <h2 className="text-sm font-semibold text-slate-900">
                   {card.title}
                 </h2>
 
-                <div className="w-8 h-0.5 bg-blue-600 mx-auto rounded-full" />
-
-                <p className="text-xs text-gray-700 leading-relaxed">
+                <p className="text-xs text-slate-600 leading-relaxed">
                   {card.description}
                 </p>
 
                 <button
                   ref={(el) => (ctaRefs.current[index] = el)}
-                  className="inline-flex items-center justify-center
+                  className="mt-2 inline-flex items-center justify-center
                              px-4 py-1.5 text-xs font-medium
-                             text-blue-600
-                             border border-blue-600/60
+                             text-slate-700
+                             border border-slate-300
                              rounded-full
-                             hover:bg-blue-600 hover:text-white
+                             hover:bg-slate-900 hover:text-white
                              transition-colors duration-300"
                 >
-                  View Details →
+                  View Details
                 </button>
               </div>
             </div>
