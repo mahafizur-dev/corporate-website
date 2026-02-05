@@ -330,6 +330,7 @@ export default function Home() {
         </p>
       </div>
 
+      
       <FocusSlider />
       <Content />
       <ContentTwo />
