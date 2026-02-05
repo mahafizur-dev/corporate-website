@@ -53,13 +53,13 @@ export default function Navbar() {
               }`}
             >
               Services
-              <span className="text-xs">▾</span>
+              {/* <span className="text-xs">▾</span> */}
             </button>
 
-            <div className="absolute left-1/2 top-full mt-6 w-screen max-w-5xl -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+            {/* <div className="absolute left-1/2 top-full mt-6 w-screen max-w-5xl -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
               <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-8 grid grid-cols-3 gap-8">
                 <div>
-                  <h4 className="mega-title">Technology</h4>
+             div     <h4 className="mega-title">Technology</h4>
                   <a href="/services/web" className="mega-link">
                     Web Development
                   </a>
@@ -97,7 +97,7 @@ export default function Navbar() {
                   </a>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           <a
