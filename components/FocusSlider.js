@@ -74,6 +74,14 @@ export default function FocusSlider() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-white">
       <section className="relative w-full max-w-6xl">
+        <div className="center mt-8 mb-8 md:mb-12 text-center">
+          <h1 className="text-2xl md:text-4xl font-semibold">
+            Execution-Driven Business Operations
+          </h1>
+          <p className="mt-2 text-sm md:text-base text-slate-600">
+            Across – Trading • Consulting • Export • Manufacturing • Development
+          </p>
+        </div>
         <div className="relative h-[520px] flex items-center justify-center">
           {CARDS.map((card, i) => {
             const d = getOffset(i);
@@ -102,12 +110,10 @@ export default function FocusSlider() {
                     draggable={false}
                   />
 
-                
                   {!isHovered && (
                     <div className="absolute inset-0 bg-black/30 transition-opacity" />
                   )}
 
-                 
                   {isHovered && (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="bg-white/90 backdrop-blur-xl rounded-xl p-6 w-[85%] text-black shadow-xl animate-fadeUp">
@@ -136,7 +142,6 @@ export default function FocusSlider() {
           })}
         </div>
 
-      
         <div className="flex justify-center gap-4 mt-10">
           <button
             onClick={() => setActiveIndex((i) => (i - 1 + total) % total)}
